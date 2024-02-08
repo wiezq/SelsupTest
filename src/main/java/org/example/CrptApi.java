@@ -40,36 +40,36 @@ public class CrptApi {
     CrptApi api = new CrptApi(5, TimeUnit.SECONDS);
 
     Product product =
-            Product.builder()
-                    .certificate_document("certificate_document")
-                    .certificate_document_date("2020-01-23")
-                    .certificate_document_number("certificate_document_number")
-                    .owner_inn("owner_inn")
-                    .producer_inn("producer_inn")
-                    .production_date("2020-01-23")
-                    .tnved_code("tnved_code")
-                    .uit_code("uit_code")
-                    .uitu_code("uitu_code")
-                    .build();
+        Product.builder()
+            .certificate_document("certificate_document")
+            .certificate_document_date("2020-01-23")
+            .certificate_document_number("certificate_document_number")
+            .owner_inn("owner_inn")
+            .producer_inn("producer_inn")
+            .production_date("2020-01-23")
+            .tnved_code("tnved_code")
+            .uit_code("uit_code")
+            .uitu_code("uitu_code")
+            .build();
 
     Description description = Description.builder().participantInn("participantInn").build();
 
     Document document =
-            Document.builder()
-                    .description(description)
-                    .doc_id("doc_id")
-                    .doc_status("doc_status")
-                    .doc_type("LP_INTRODUCE_GOODS")
-                    .importRequest(true)
-                    .owner_inn("owner_inn")
-                    .participant_inn("participant_inn")
-                    .producer_inn("producer_inn")
-                    .production_date("2020-01-23")
-                    .production_type("production_type")
-                    .products(Collections.singletonList(product))
-                    .reg_date("2020-01-23")
-                    .reg_number("reg_number")
-                    .build();
+        Document.builder()
+            .description(description)
+            .doc_id("doc_id")
+            .doc_status("doc_status")
+            .doc_type("LP_INTRODUCE_GOODS")
+            .importRequest(true)
+            .owner_inn("owner_inn")
+            .participant_inn("participant_inn")
+            .producer_inn("producer_inn")
+            .production_date("2020-01-23")
+            .production_type("production_type")
+            .products(Collections.singletonList(product))
+            .reg_date("2020-01-23")
+            .reg_number("reg_number")
+            .build();
 
     try {
       System.out.println(api.createDocument(document, "signature"));
