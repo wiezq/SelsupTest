@@ -4,13 +4,11 @@ import com.google.gson.Gson;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
-import org.apache.hc.client5.http.classic.methods.HttpPost;
-import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
-import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
-import org.apache.hc.client5.http.impl.classic.HttpClients;
-import org.apache.hc.core5.http.io.entity.EntityUtils;
-import org.apache.hc.core5.http.io.entity.StringEntity;
 
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.Executors;
@@ -19,37 +17,32 @@ import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 
 public class CrptApi {
-
-
     private final Semaphore semaphore;
     private final Gson gson;
-
-    private final static String URL = "https://ismp.crpt.ru/api/v3/lk/documents/create";
-
-    private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+    private final HttpClient client;
 
 
     public CrptApi(int requestLimit, TimeUnit timeUnit) {
         this.semaphore = new Semaphore(requestLimit);
         this.gson = new Gson();
+        this.client = HttpClient.newHttpClient();
+        ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
         scheduler.scheduleAtFixedRate(() -> semaphore.release(requestLimit - semaphore.availablePermits()), 1, 1, timeUnit);
     }
 
-    public void createDocument(Document document, String signature) throws Exception {
+    public String createDocument(Document document, String signature) throws Exception {
         semaphore.acquire();
-        try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
-            HttpPost httpPost = new HttpPost(URL);
-            String json = gson.toJson(document);
-            StringEntity entity = new StringEntity(json);
-            httpPost.setEntity(entity);
-            httpPost.setHeader("Accept", "application/json");
-            httpPost.setHeader("Content-type", "application/json");
-            httpPost.setHeader("Signature", signature);
 
-            try (CloseableHttpResponse response = httpClient.execute(httpPost)) {
-                System.out.println(EntityUtils.toString(response.getEntity()));
-            }
-        }
+        String json = gson.toJson(document);
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(new URI("https://ismp.crpt.ru/api/v3/lk/documents/create"))
+                .header("Accept", "application/json")
+                .header("Content-Type", "application/json")
+                .header("Signature", signature)
+                .POST(HttpRequest.BodyPublishers.ofString(json))
+                .build();
+        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+        return response.body();
 
     }
 
@@ -89,7 +82,7 @@ public class CrptApi {
                 .build();
 
         try {
-            api.createDocument(document, "siganture");
+            api.createDocument(document, "signature");
         } catch (Exception e) {
             e.printStackTrace();
         }
