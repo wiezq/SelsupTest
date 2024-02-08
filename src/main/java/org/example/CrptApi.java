@@ -82,7 +82,7 @@ public class CrptApi {
                 .build();
 
         try {
-            api.createDocument(document, "signature");
+            System.out.println(api.createDocument(document, "signature"));
         } catch (Exception e) {
             e.printStackTrace();
         }
